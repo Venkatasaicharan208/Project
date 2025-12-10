@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>LabourSkill — Skill Development for Labour</title>
+  <style>
+    /* --------- Reset & Base --------- */
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%}
+    body{font-family:Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;background:#0b0f1a;color:#e6eef8}
+    a{color:inherit}
+
+    /* --------- App Shell --------- */
+    .app{min-height:100vh;display:flex;flex-direction:column}
+    header.app-header{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:linear-gradient(90deg, rgba(255,255,255,0.03), transparent);backdrop-filter:blur(6px);position:sticky;top:0;z-index:40}
+    .brand{display:flex;align-items:center;gap:10px}
+    .logo{width:40px;height:40px;border-radius:6px;background:linear-gradient(135deg,#ff6b6b,#f06595);display:flex;align-items:center;justify-content:center;font-weight:800;color:white}
+    .title{font-weight:700}
+
+    .controls{display:flex;align-items:center;gap:12px}
+    .search{position:relative}
+    .search input{padding:8px 12px;border-radius:8px;border:none;background:rgba(255,255,255,0.03);color:inherit;width:220px}
+    .search input::placeholder{color:rgba(230,238,248,0.5)}
+    .icon-btn{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px;border-radius:8px;color:inherit;cursor:pointer}
+
+    /* --------- Main layout --------- */
+    .layout{display:flex;gap:20px;max-width:1200px;margin:20px auto;padding:0 16px;width:100%}
+
+    /* Sidebar */
+    .sidebar{width:220px;flex-shrink:0}
+    .nav{background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);padding:16px;border-radius:12px}
+    .nav h3{font-size:14px;margin-bottom:8px;color:#cfe3ff}
+    .nav a{display:block;padding:10px;border-radius:8px;text-decoration:none;color:#dff;opacity:0.95}
+    .nav a.active{background:rgba(11,91,215,0.12);color:#bfe0ff}
+
+    /* Content */
+    .content{flex:1}
+
+    .hero{border-radius:12px;padding:22px;background-image:linear-gradient(120deg, rgba(255,255,255,0.02), rgba(11,91,215,0.06));display:flex;gap:20px;align-items:center}
+    .hero .meta{flex:1}
+    .hero h1{font-size:1.6rem;margin-bottom:6px}
+    .hero p{color:#cbe0ff;margin-bottom:12px}
+    .cta{display:flex;gap:10px}
+    .btn{background:#0b5bd7;padding:10px 14px;border-radius:8px;color:white;border:none;cursor:pointer;font-weight:600}
+    .muted{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:10px 14px;border-radius:8px;color:inherit}
+
+    .rows{margin-top:18px}
+    .row-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+    .carousel{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(200px,1fr);gap:12px;overflow-x:auto;padding-bottom:8px}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:10px;border-radius:10px;min-height:220px;width:200px;position:relative}
+    .thumb{width:100%;height:120px;border-radius:8px;object-fit:cover;margin-bottom:8px}
+    .meta-small{font-size:13px;color:#dbefff}
+    .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+    .tag{background:rgba(255,255,255,0.03);padding:6px 8px;border-radius:999px;font-size:12px}
+
+    /* modal */
+    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;z-index:120}
+    .modal-backdrop.open{display:flex}
+    .modal{background:#071025;padding:18px;border-radius:12px;max-width:720px;width:92%;box-shadow:0 30px 60px rgba(2,6,23,0.8)}
+    .modal .row{display:flex;gap:14px}
+    .modal img{width:260px;height:150px;object-fit:cover;border-radius:8px}
+    .modal .info{flex:1}
+    .close{position:absolute;right:14px;top:10px;background:transparent;border:none;color:#cfe3ff;font-size:20px;cursor:pointer}
+
+    /* responsive */
+    @media (max-width:980px){
+      .layout{padding:0 12px}
+      .sidebar{display:none}
+      .carousel{grid-auto-columns:minmax(180px,1fr)}
+      .search input{width:140px}
+    }
+    @media (max-width:600px){
+      .hero{flex-direction:column;align-items:flex-start}
+      .modal .row{flex-direction:column}
+      .modal img{width:100%;height:200px}
+    }
+
+    /* small utilities & animations */
+    .card:hover{transform:translateY(-6px);transition:transform .22s ease,box-shadow .22s ease;box-shadow:0 12px 40px rgba(11,91,215,0.12)}
+    .carousel::-webkit-scrollbar{height:8px}
+    .carousel::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.06);border-radius:10px}
+
+    /* progress */
+    .progress{height:10px;background:rgba(255,255,255,0.04);border-radius:999px;overflow:hidden}
+    .progress > i{display:block;height:100%;background:linear-gradient(90deg,#ffb86b,#f06595);width:0%}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="app-header">
+      <div class="brand">
+        <div class="logo">LS</div>
+        <div>
+          <div class="title">LabourSkill</div>
+          <div style="font-size:12px;color:#9fb9ff">Skill development for labour</div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="search">
+          <input id="searchInput" placeholder="Search skills, trades, courses..." aria-label="Search courses" />
+        </div>
+        <button class="icon-btn" id="profileBtn" aria-label="Open profile">👤</button>
+      </div>
+    </header>
+
+    <div class="layout">
+      <aside class="sidebar">
+        <nav class="nav" aria-label="Main navigation">
+          <h3>Browse</h3>
+          <a href="#" class="active">For You</a>
+          <a href="#">Popular</a>
+          <a href="#">New</a>
+          <a href="#">By Trade</a>
+          <a href="#">Certification</a>
+        </nav>
+
+        <div style="height:12px"></div>
+
+        <nav class="nav" aria-label="Filters">
+          <h3>Filters</h3>
+          <a href="#" data-filter="all">All Levels</a>
+          <a href="#" data-filter="beginner">Beginner</a>
+          <a href="#" data-filter="intermediate">Intermediate</a>
+          <a href="#" data-filter="advanced">Advanced</a>
+        </nav>
+      </aside>
+
+      <main class="content">
+        <section class="hero" aria-labelledby="heroTitle">
+          <div class="meta">
+            <h1 id="heroTitle">Upskill for better livelihoods</h1>
+            <p>Short hands-on courses designed for tradespeople and labour — safety, efficiency and certification-focused.</p>
+
+            <div class="cta">
+              <button class="btn" id="exploreBtn">Explore Courses</button>
+              <button class="muted" id="demoBtn">How it works</button>
+            </div>
+
+            <div style="margin-top:12px;max-width:520px">
+              <div style="font-size:13px;color:#cbe0ff;margin-bottom:6px">Your progress</div>
+              <div class="progress" aria-hidden="true"><i id="globalProgress" style="width:28%"></i></div>
+            </div>
+          </div>
+
+          <div style="width:320px;display:flex;align-items:center;justify-content:center">
+            <img src="https://picsum.photos/seed/work/380/220" alt="workers" style="border-radius:10px;width:100%;height:auto;object-fit:cover;box-shadow:0 20px 60px rgba(2,6,23,0.6)" />
+          </div>
+        </section>
+
+        <!-- Rows of courses -->
+        <div class="rows" id="rowsContainer"></div>
+
+      </main>
+    </div>
+
+    <footer style="text-align:center;padding:16px;color:#9fb9ff;background:linear-gradient(180deg,transparent,rgba(255,255,255,0.02))">©️ 2025 LabFlix • Built for training & placement</footer>
+  </div>
+
+  <!-- Modal -->
+  <div id="modalBackdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal" role="document">
+      <button class="close" id="modalClose">✕</button>
+      <div class="row">
+        <img id="modalImg" src="" alt="Course image"/>
+        <div class="info">
+          <h2 id="modalTitle">Course Title</h2>
+          <p id="modalDesc">Description</p>
+          <div style="margin-top:10px" class="meta-small">Duration: <span id="modalDuration">4 weeks</span> • Level: <span id="modalLevel">Beginner</span></div>
+          <div style="margin-top:12px"><button class="btn" id="enrollBtn">Enroll</button> <button class="muted" id="previewBtn">Preview</button></div>
+          <div style="margin-top:12px" class="tags" id="modalTags"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ---------- Sample course data ----------
+    const COURSES = [
+      {id:1,title:'Basic Electrical Safety',desc:'Safety practices, PPE, wiring basics for electricians.',img:'https://picsum.photos/seed/e1/600/400',duration:'2 weeks',level:'Beginner',tags:['Safety','Certification']},
+      {id:2,title:'Plumbing Essentials',desc:'Hands-on plumbing: joints, leaks, drainage systems.',img:'https://picsum.photos/seed/p2/600/400',duration:'3 weeks',level:'Beginner',tags:['Trade','Hands-on']},
+      {id:3,title:'Welding Fundamentals',desc:'Arc welding basics, machine handling, weld quality.',img:'https://picsum.photos/seed/w3/600/400',duration:'4 weeks',level:'Intermediate',tags:['Certificate','Tool-use']},
+      {id:4,title:'Carpentry — Furniture Making',desc:'From measuring to finishing: furniture building workflow.',img:'https://picsum.photos/seed/c4/600/400',duration:'5 weeks',level:'Intermediate',tags:['Craft','Portfolio']},
+      {id:5,title:'Construction Site Management',desc:'Site safety, crew coordination and basic project planning.',img:'https://picsum.photos/seed/s5/600/400',duration:'6 weeks',level:'Advanced',tags:['Management','Safety']},
+      {id:6,title:'Mobile Repair & Diagnostics',desc:'Phone repair basics and diagnostic troubleshooting flow.',img:'https://picsum.photos/seed/m6/600/400',duration:'3 weeks',level:'Beginner',tags:['Electronics','Hands-on']},
+      {id:7,title:'Barbering & Grooming',desc:'Basic hair cutting techniques and hygiene standards.',img:'https://picsum.photos/seed/b7/600/400',duration:'2 weeks',level:'Beginner',tags:['Service','Microbusiness']},
+      {id:8,title:'Agriculture — Crop Management',desc:'Sustainable practices, pest control and yield improvement.',img:'https://picsum.photos/seed/a8/600/400',duration:'4 weeks',level:'Intermediate',tags:['Agri','Sustainability']}
+    ];
+
+    // categories/rows
+    const ROWS = [
+      {title:'Recommended for you',filter:()=>true},
+      {title:'Popular trades',filter:c=>['Welding Fundamentals','Plumbing Essentials','Basic Electrical Safety'].includes(c.title)},
+      {title:'Quick courses (≤3 weeks)',filter:c=>{const w = parseInt(c.duration); return w<=3}},
+      {title:'Advanced & Management',filter:c=>c.level==='Advanced'}
+    ];
+
+    // render rows
+    const rowsContainer = document.getElementById('rowsContainer');
+    function createCard(course){
+      const div = document.createElement('div'); div.className='card';
+      div.innerHTML = `
+        <img loading="lazy" src="${course.img}" class="thumb" alt="${course.title}" />
+        <div class="meta-small"><strong>${course.title}</strong></div>
+        <div style="font-size:13px;color:#bfe0ff;margin-top:6px">${course.desc}</div>
+        <div style="margin-top:8px;font-size:13px;color:#9fb9ff">${course.duration} • ${course.level}</div>
+        <div class="tags">${course.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+      `;
+      div.addEventListener('click', ()=>openModal(course));
+      return div;
+    }
+
+    function renderRows(list){
+      rowsContainer.innerHTML = '';
+      ROWS.forEach(row=>{
+        const rowEl = document.createElement('section');
+        rowEl.className='row';
+        rowEl.innerHTML = `<div class="row-title"><h3 style="color:#dff">${row.title}</h3><a href="#">See all</a></div>`;
+        const carousel = document.createElement('div'); carousel.className='carousel';
+        const filtered = list.filter(row.filter);
+        filtered.forEach(c=>carousel.appendChild(createCard(c)));
+        rowEl.appendChild(carousel);
+        rowsContainer.appendChild(rowEl);
+      });
+    }
+
+    renderRows(COURSES);
+
+    // search
+    const searchInput = document.getElementById('searchInput');
+    searchInput.addEventListener('input', e=>{
+      const q = e.target.value.trim().toLowerCase();
+      if(!q) return renderRows(COURSES);
+      const filtered = COURSES.filter(c=> (c.title+c.desc+(c.tags||[]).join(' ')).toLowerCase().includes(q));
+      renderRows(filtered.length?filtered:[]);
+    });
+
+    // modal
+    const modalBackdrop = document.getElementById('modalBackdrop');
+    const modalImg = document.getElementById('modalImg');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalDesc = document.getElementById('modalDesc');
+    const modalDuration = document.getElementById('modalDuration');
+    const modalLevel = document.getElementById('modalLevel');
+    const modalTags = document.getElementById('modalTags');
+    const modalClose = document.getElementById('modalClose');
+    const enrollBtn = document.getElementById('enrollBtn');
+
+    function openModal(course){
+      modalImg.src = course.img;
+      modalTitle.textContent = course.title;
+      modalDesc.textContent = course.desc;
+      modalDuration.textContent = course.duration;
+      modalLevel.textContent = course.level;
+      modalTags.innerHTML = course.tags.map(t=>`<span class="tag" style="margin-right:6px">${t}</span>`).join('');
+      modalBackdrop.classList.add('open');
+      modalBackdrop.setAttribute('aria-hidden','false');
+      enrollBtn.onclick = ()=>{
+        enroll(course);
+      }
+    }
+    modalClose.addEventListener('click', ()=>closeModal());
+    modalBackdrop.addEventListener('click', (e)=>{ if(e.target===modalBackdrop) closeModal(); });
+    window.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
+    function closeModal(){ modalBackdrop.classList.remove('open'); modalBackdrop.setAttribute('aria-hidden','true'); }
+
+    function enroll(course){
+      // simple simulated enroll: increase progress and show confirmation
+      closeModal();
+      const progressEl = document.getElementById('globalProgress');
+      // increment by random 5-12%
+      let current = parseInt(progressEl.style.width)||0; current = Math.min(100,current + (5 + Math.floor(Math.random()*8)));
+      progressEl.style.width = current + '%';
+      alert('Enrolled in "'+course.title+'" — good luck!');
+    }
+
+    // demo buttons
+    document.getElementById('exploreBtn').addEventListener('click', ()=>{
+      document.querySelector('.layout').scrollIntoView({behavior:'smooth'});
+    });
+
+    document.getElementById('demoBtn').addEventListener('click', ()=>{
+      alert('LabFlix connects learners to short hands-on courses, certificates and local placement assistance. Replace this with a rich demo or onboarding flow.');
+    });
+
+
+  </script>
+</body>
+</html>
